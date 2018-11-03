@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CrePro</string>
+    <string name="accessibility_description">OK Google からの音声コマンドを取得します</string>
+</resources>
