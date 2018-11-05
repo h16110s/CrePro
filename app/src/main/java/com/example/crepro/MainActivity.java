@@ -13,23 +13,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private TextToSpeech tts ;
-    ListView lv;
     private static String pokeData;
-    private  String[] name;
-    private static String[] foods = {
-        "Apple", "Banana","Hello World"
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //音声合成インスタンス
         tts = new TextToSpeech(this, null);
-        lv = (ListView) findViewById(R.id.listView);
+
+        //データを取得するためのリソースファイルのインスタンス
         Resources res = this.getResources();
+
+        //データを取得
         InputStream stream_in = res.openRawResource(R.raw.pokemon_data);
         try{
             Reader reader = new InputStreamReader(stream_in);
@@ -40,28 +42,49 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e){
             Log.e("IO", e.toString());
         }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,foods);
-        lv.setAdapter(arrayAdapter);
     }
 
 
     public void sp(View v){
         tts.speak("こんにちは", TextToSpeech.QUEUE_FLUSH, null);
     }
+
     public void pokeSearch(View v){
-        String test = "ポッチャマ";
+        String test = "アーボ";
+        PokeDatum temp = null;
+        Status statusTmp = null;
         // 読み込んだ内容をJSONArrayにパース
         JSONArray pokeArray = null;
         try {
             pokeArray = new JSONArray(pokeData);
             for(int i = 0; i < pokeArray.length(); i++) {
                 JSONObject pokemon = (JSONObject) pokeArray.get(i);
+
                 //ヒットした時にはポケモンの個体データを取得して返す
                 if(pokemon.getString("name").equals(test)){
+
                     JSONObject stats = pokemon.getJSONObject("stats");
+                    statusTmp = new Status(
+                            stats.getInt("hp"),
+                            stats.getInt("attack"),
+                            stats.getInt("spAttack"),
+                            stats.getInt("spDefence"),
+                            stats.getInt("speed"));
+
                     JSONArray type = pokemon.getJSONArray("types");
                     JSONArray abilities = pokemon.getJSONArray("abilities");
                     JSONArray hiddenAbilities = pokemon.getJSONArray("hiddenAbilities");
+
+                    temp = new PokeDatum(
+                            pokemon.getInt("no"),
+                            pokemon.getString("name"),
+                            pokemon.getString("form"),
+                            pokemon.getBoolean("isMegaEvolution"),
+                            JsonArrayToList(type),
+                            JsonArrayToList(abilities),
+                            JsonArrayToList(hiddenAbilities),
+                            statusTmp);
+                    break;
                 }
             }
         } catch (JSONException e) {
@@ -69,6 +92,13 @@ public class MainActivity extends AppCompatActivity {
         } catch (NullPointerException e){
             Log.e("JSON-Read",e.toString());
         }
-        // パースした内容からListオブジェクトを作成
+    }
+
+    public List<String> JsonArrayToList(JSONArray input) throws JSONException {
+        List<String> tmp = new LinkedList<>();
+        for(int i = 0 ; i<input.length() ; i++){
+            tmp.add(input.getString(i));
+        }
+        return tmp;
     }
 }

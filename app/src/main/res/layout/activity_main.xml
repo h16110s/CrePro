@@ -8,11 +8,11 @@
         tools:context=".MainActivity">
 
     <Button
-            android:text="Button"
+            android:text="Search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:id="@+id/button" android:onClick="sp"
+            android:id="@+id/button" android:onClick="pokeSearch"
             app:layout_constraintHorizontal_bias="0.101" app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="8dp"/>
     <ListView
