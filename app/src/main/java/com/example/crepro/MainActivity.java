@@ -1,6 +1,8 @@
 package com.example.crepro;
 
+import android.content.Intent;
 import android.content.res.Resources;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,17 +10,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private TextToSpeech tts ;
     private static String pokeData;
+    private final int requestCode = 1234;
+    public  PokeDatum searchPokemon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +55,47 @@ public class MainActivity extends AppCompatActivity {
         tts.speak("こんにちは", TextToSpeech.QUEUE_FLUSH, null);
     }
 
-    public void pokeSearch(View v){
-        String test = "アーボ";
-        PokeDatum temp = null;
+    public void srbtn(View v){
+        //インテント作成
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+
+        //表示させる文字列
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,"音声を文字で出力します。");
+        //アクティビティ開始
+        startActivityForResult(intent,requestCode);
+
+    }
+
+    @Override
+    protected void onActivityResult(int rCode, int resultCode, Intent data){
+        //自分が投げたインテントであれば応答する
+        if(rCode == requestCode && resultCode == RESULT_OK){
+            //すべての結果を配列に受け取る
+            ArrayList<String> speechToChar = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            String spokenString = "";
+            //ここでは、認識結果が複数あった場合に結合している。
+            for(int i = 0; i < speechToChar.size() ; i++){
+                spokenString += speechToChar.get(i) + "\n";
+            }
+
+            //結果に”時刻”が含まれているか
+            if(spokenString.indexOf("時刻") != -1){
+
+            }
+            else {
+
+            }
+            //トーストで表示
+            Toast.makeText(this, spokenString, Toast.LENGTH_LONG).show();
+            //ダイアログ表示
+            super.onActivityResult(requestCode,resultCode,data);// お決まり
+        }
+    }
+
+
+    public void pokeSearch(String name){
         Status statusTmp = null;
         // 読み込んだ内容をJSONArrayにパース
         JSONArray pokeArray = null;
@@ -61,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject pokemon = (JSONObject) pokeArray.get(i);
 
                 //ヒットした時にはポケモンの個体データを取得して返す
-                if(pokemon.getString("name").equals(test)){
+                if(pokemon.getString("name").equals(name)){
 
                     JSONObject stats = pokemon.getJSONObject("stats");
                     statusTmp = new Status(
@@ -75,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONArray abilities = pokemon.getJSONArray("abilities");
                     JSONArray hiddenAbilities = pokemon.getJSONArray("hiddenAbilities");
 
-                    temp = new PokeDatum(
+                    searchPokemon = new PokeDatum(
                             pokemon.getInt("no"),
                             pokemon.getString("name"),
                             pokemon.getString("form"),
@@ -88,8 +132,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } catch (JSONException e) {
+            Toast.makeText(this,"検索エラー", Toast.LENGTH_LONG).show();
             Log.e("JSON",e.toString());
         } catch (NullPointerException e){
+            Toast.makeText(this,"読み込みエラー", Toast.LENGTH_LONG).show();
             Log.e("JSON-Read",e.toString());
         }
     }
