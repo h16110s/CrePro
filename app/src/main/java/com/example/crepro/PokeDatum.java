@@ -1,5 +1,6 @@
 package com.example.crepro;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PokeDatum {
@@ -7,15 +8,15 @@ public class PokeDatum {
     String name;
     String form;
     boolean isMegaEvolution;
-    List<String> types;
-    List<String> abilities;
-    List<String> hiddenAbilities;
+    ArrayList<String> types;
+    ArrayList<String> abilities;
+    ArrayList<String> hiddenAbilities;
     Status status;
 
     public  PokeDatum (){
         this.name = null;
     }
-    public PokeDatum(int no, String name,String form ,boolean isMega, List<String> types, List<String> abi, List<String> hidden, Status status){
+    public PokeDatum(int no, String name,String form ,boolean isMega, ArrayList<String> types, ArrayList<String> abi, ArrayList<String> hidden, Status status){
         this.no = no;
         this.name = name;
         this.form = form;
@@ -24,6 +25,21 @@ public class PokeDatum {
         this.abilities = abi;
         this.hiddenAbilities = hidden;
         this.status = status;
+    }
+    @Override
+    public String toString(){
+        String s;
+        s = "No: " + this.no + "\n";
+        s += "Name: " + this.name + "\n";
+        if(this.form != ""){
+            s += this.form + "\n";
+        }
+        s += "メガ進化: " + this.isMegaEvolution + "\n";
+        s += "タイプ: " +types.toString() + "\n";
+        s += "特性: " + abilities.toString() + "\n";
+        s += "夢特性: " + hiddenAbilities.toString() + "\n";
+        s += status.toString();
+        return s;
     }
 }
 

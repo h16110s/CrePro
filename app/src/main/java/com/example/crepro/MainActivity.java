@@ -1,9 +1,12 @@
 package com.example.crepro;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -60,12 +63,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-
         //表示させる文字列
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,"音声を文字で出力します。");
         //アクティビティ開始
         startActivityForResult(intent,requestCode);
-
     }
 
     @Override
@@ -74,22 +75,20 @@ public class MainActivity extends AppCompatActivity {
         if(rCode == requestCode && resultCode == RESULT_OK){
             //すべての結果を配列に受け取る
             ArrayList<String> speechToChar = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            String spokenString = "";
             //ここでは、認識結果が複数あった場合に結合している。
+            String spokenString = "";
             for(int i = 0; i < speechToChar.size() ; i++){
                 spokenString += speechToChar.get(i) + "\n";
             }
-
-            //結果に”時刻”が含まれているか
-            if(spokenString.indexOf("時刻") != -1){
-
-            }
-            else {
-
-            }
             //トーストで表示
-            Toast.makeText(this, spokenString, Toast.LENGTH_LONG).show();
-            //ダイアログ表示
+            Toast.makeText(this,spokenString, Toast.LENGTH_LONG).show();
+
+            //検索 とりあえず1番目のもの
+            pokeSearch(speechToChar.get(0).replaceAll(" ",""));
+//
+//            //ダイアログ表示
+            showDialog(this,"",searchPokemon.toString());
+
             super.onActivityResult(requestCode,resultCode,data);// お決まり
         }
     }
@@ -106,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
                 //ヒットした時にはポケモンの個体データを取得して返す
                 if(pokemon.getString("name").equals(name)){
-
                     JSONObject stats = pokemon.getJSONObject("stats");
                     statusTmp = new Status(
                             stats.getInt("hp"),
@@ -130,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                             statusTmp);
                     break;
                 }
+
             }
         } catch (JSONException e) {
             Toast.makeText(this,"検索エラー", Toast.LENGTH_LONG).show();
@@ -140,11 +139,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public List<String> JsonArrayToList(JSONArray input) throws JSONException {
-        List<String> tmp = new LinkedList<>();
+    public ArrayList<String> JsonArrayToList(JSONArray input) throws JSONException {
+        ArrayList<String> tmp = new ArrayList<>();
         for(int i = 0 ; i<input.length() ; i++){
             tmp.add(input.getString(i));
         }
         return tmp;
+    }
+
+    private void showDialog(final Activity activity, String title, String text){
+        AlertDialog.Builder ad = new AlertDialog.Builder(activity);
+        ad.setTitle(title);
+        ad.setMessage(text);
+        ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                activity.setResult(Activity.RESULT_OK);
+            }
+        });
+        ad.create();
+        ad.show();
     }
 }
