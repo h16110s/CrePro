@@ -16,7 +16,7 @@ public class PokeSearcher {
     String pokeData;
     PokeDatum searchPokemon;
 
-    public PokeDatum getPokemonInfo(){ return this.searchPokemon; }
+    public PokeDatum getPokemonInfo()throws NullPointerException{ return this.searchPokemon; }
 
     public PokeSearcher(InputStream inputData){
         try{

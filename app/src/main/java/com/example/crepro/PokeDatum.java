@@ -41,5 +41,19 @@ public class PokeDatum {
         s += status.toString();
         return s;
     }
+
+    public String makeReadData(){
+        String s = "";
+        s += this.name + "。";
+        for(int i = 0; i < types.size(); i++){
+            s += this.types.get(i) + "、";
+        }
+        s += "タイプ。";
+        s += "とくせいは";
+        for(int i = 0 ; i < abilities.size() ; i++){
+            s += this.abilities.get(i);
+        }
+        return s;
+    }
 }
 
