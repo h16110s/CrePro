@@ -26,6 +26,18 @@ public class PokeDatum {
         this.hiddenAbilities = hidden;
         this.status = status;
     }
+
+    public void setData(int no, String name,String form ,boolean isMega, ArrayList<String> types, ArrayList<String> abi, ArrayList<String> hidden, Status status){
+        this.no = no;
+        this.name = name;
+        this.form = form;
+        this.isMegaEvolution = isMega;
+        this.types = types;
+        this.abilities = abi;
+        this.hiddenAbilities = hidden;
+        this.status = status;
+    }
+
     @Override
     public String toString(){
         String s;

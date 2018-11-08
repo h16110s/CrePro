@@ -14,9 +14,9 @@ import java.util.ArrayList;
 
 public class PokeSearcher {
     String pokeData;
-    PokeDatum searchPokemon;
+    ArrayList<PokeDatum> pokeLog = new ArrayList<>();
 
-    public PokeDatum getPokemonInfo()throws NullPointerException{ return this.searchPokemon; }
+    public PokeDatum getPokemonInfo()throws NullPointerException{ return pokeLog.get(pokeLog.size()-1); }
 
     public PokeSearcher(InputStream inputData){
         try{
@@ -31,6 +31,7 @@ public class PokeSearcher {
     }
 
     public void pokeSearch(String name){
+        PokeDatum searchPokemon;
         Status statusTmp = null;
         // 読み込んだ内容をJSONArrayにパース
         JSONArray pokeArray = null;
@@ -54,7 +55,7 @@ public class PokeSearcher {
                     JSONArray abilities = pokemon.getJSONArray("abilities");
                     JSONArray hiddenAbilities = pokemon.getJSONArray("hiddenAbilities");
 
-                    searchPokemon = new PokeDatum(
+                    pokeLog.add(new PokeDatum(
                             pokemon.getInt("no"),
                             pokemon.getString("name"),
                             pokemon.getString("form"),
@@ -62,12 +63,11 @@ public class PokeSearcher {
                             JsonArrayToList(type),
                             JsonArrayToList(abilities),
                             JsonArrayToList(hiddenAbilities),
-                            statusTmp);
+                            statusTmp));
+
                     break;
                 }
             }
-            //いなかったとき
-            this.pokeData = null;
         } catch (JSONException e) {
             Log.e("PS-JSON",e.toString());
         } catch (NullPointerException e){
