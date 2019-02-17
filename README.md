@@ -9,4 +9,4 @@
   - データベース化できればいいなぁ
  
 # 備考
-  https://github.com/kotofurumiya　様のhttps://github.com/kotofurumiya/pokemon_data　を使用させていただきました
+  [kotofurumiya](https://github.com/kotofurumiya)様の[ポケモン個体値データ](https://github.com/kotofurumiya/pokemon_data)を使用させていただきました
