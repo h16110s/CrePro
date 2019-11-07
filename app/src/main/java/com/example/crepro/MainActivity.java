@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
                     statusTmp = new Status(
                             stats.getInt("hp"),
                             stats.getInt("attack"),
+                            stats.getInt("defence"),
                             stats.getInt("spAttack"),
                             stats.getInt("spDefence"),
                             stats.getInt("speed"));
