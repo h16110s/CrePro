@@ -25,9 +25,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private TextToSpeech tts ;
-    private static String pokeData;
     private final int requestCode = 1234;
-    public  PokeDatum searchPokemon;
+    PokeSearcher pokeSearcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,17 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         //データを取得
         InputStream stream_in = res.openRawResource(R.raw.pokemon_data);
-        try{
-            Reader reader = new InputStreamReader(stream_in);
-            byte[] buffer = new byte[stream_in.available()];
-            while((stream_in.read(buffer)) != -1) {}
-            pokeData = new String(buffer);
-            stream_in.close();
-        } catch (IOException e){
-            Log.e("IO", e.toString());
-        }
+        pokeSearcher = new PokeSearcher(stream_in);
     }
-
 
     public void sp(View v){
         tts.speak("こんにちは", TextToSpeech.QUEUE_FLUSH, null);
@@ -64,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
         //表示させる文字列
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,"音声を文字で出力します。");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,"ポケモンのデータを音声で検索します。");
         //アクティビティ開始
         startActivityForResult(intent,requestCode);
     }
@@ -84,68 +74,13 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this,spokenString, Toast.LENGTH_LONG).show();
 
             //検索 とりあえず1番目のもの
-            pokeSearch(speechToChar.get(0).replaceAll(" ",""));
-//
+            pokeSearcher.pokeSearch(speechToChar.get(0).replaceAll(" ",""));
+
 //            //ダイアログ表示
-            showDialog(this,"",searchPokemon.toString());
+            showDialog(this,"",pokeSearcher.getPokemonInfo().toString());
 
             super.onActivityResult(requestCode,resultCode,data);// お決まり
         }
-    }
-
-
-    public void pokeSearch(String name){
-        Status statusTmp = null;
-        // 読み込んだ内容をJSONArrayにパース
-        JSONArray pokeArray = null;
-        try {
-            pokeArray = new JSONArray(pokeData);
-            for(int i = 0; i < pokeArray.length(); i++) {
-                JSONObject pokemon = (JSONObject) pokeArray.get(i);
-
-                //ヒットした時にはポケモンの個体データを取得して返す
-                if(pokemon.getString("name").equals(name)){
-                    JSONObject stats = pokemon.getJSONObject("stats");
-                    statusTmp = new Status(
-                            stats.getInt("hp"),
-                            stats.getInt("attack"),
-                            stats.getInt("defence"),
-                            stats.getInt("spAttack"),
-                            stats.getInt("spDefence"),
-                            stats.getInt("speed"));
-
-                    JSONArray type = pokemon.getJSONArray("types");
-                    JSONArray abilities = pokemon.getJSONArray("abilities");
-                    JSONArray hiddenAbilities = pokemon.getJSONArray("hiddenAbilities");
-
-                    searchPokemon = new PokeDatum(
-                            pokemon.getInt("no"),
-                            pokemon.getString("name"),
-                            pokemon.getString("form"),
-                            pokemon.getBoolean("isMegaEvolution"),
-                            JsonArrayToList(type),
-                            JsonArrayToList(abilities),
-                            JsonArrayToList(hiddenAbilities),
-                            statusTmp);
-                    break;
-                }
-
-            }
-        } catch (JSONException e) {
-            Toast.makeText(this,"検索エラー", Toast.LENGTH_LONG).show();
-            Log.e("JSON",e.toString());
-        } catch (NullPointerException e){
-            Toast.makeText(this,"読み込みエラー", Toast.LENGTH_LONG).show();
-            Log.e("JSON-Read",e.toString());
-        }
-    }
-
-    public ArrayList<String> JsonArrayToList(JSONArray input) throws JSONException {
-        ArrayList<String> tmp = new ArrayList<>();
-        for(int i = 0 ; i<input.length() ; i++){
-            tmp.add(input.getString(i));
-        }
-        return tmp;
     }
 
     private void showDialog(final Activity activity, String title, String text){
